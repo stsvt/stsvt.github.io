@@ -67,6 +67,8 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 .closed #shutter{transform:scaleY(1);stroke-opacity:.25}
 #diam{stroke:var(--line);stroke-width:3;transition:stroke-width .5s,stroke .5s}
 .closed #diam{stroke:var(--ink);stroke-width:9}
+#vertex{r:7;transition:r .5s cubic-bezier(.34,1.56,.64,1)}
+.closed #vertex{r:13}
 #live{opacity:0;pointer-events:none;transition:opacity .6s .5s}
 .closed #live{opacity:1;pointer-events:auto}
 .cap{font-weight:800;font-size:30px;fill:var(--ink);text-anchor:middle;transition:opacity .5s}
@@ -106,13 +108,14 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
   <path id="shutter" d="M200 250 A200 200 0 0 0 600 250 Z" fill="url(#stripes)" stroke="var(--line)" stroke-width="3"/>
   <path class="circle-outline" d="M200 250 A200 200 0 0 1 600 250" fill="none" stroke="var(--line)" stroke-width="4"/>
   <line id="diam" x1="200" y1="250" x2="600" y2="250" stroke-linecap="round"/>
-  <circle cx="400" cy="250" r="7" fill="var(--ink)"/>
 
   <g id="rayG" style="opacity:0;pointer-events:none;transition:opacity .6s .5s">
     <line id="ray" x1="400" y1="250" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"/>
     <circle id="handle" r="20" fill="var(--accent)" stroke="var(--card)" stroke-width="4"
             tabindex="0" role="slider" aria-label="Промінь" aria-valuemin="5" aria-valuemax="175"/>
   </g>
+
+  <circle id="vertex" cx="400" cy="250" r="7" fill="var(--ink)"/>
 
 </svg>
 <div class="controls">
