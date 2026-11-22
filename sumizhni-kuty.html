@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Розгорнутий та суміжні кути</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+  --bg:#f6efe2; --card:#fffaf0; --ink:#4a3f35; --muted:#8a7b6a; --line:#b9a98f;
+  --disc:#fffdf7; --curtain:#e6d6bb; --curtain2:#dcc9a8;
+  --blue:#bcdcf0; --blue-d:#4f8fb8; --yellow:#fbe2a2; --yellow-d:#c58f1c;
+  --btn:#e9dcc6; --btn-h:#e0d0b2; --accent:#d98b6a;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#2b2620; --card:#38312a; --ink:#f1e8d8; --muted:#b5a68f; --line:#8d7f69;
+    --disc:#3f372f; --curtain:#5a4e3e; --curtain2:#65584a;
+    --blue:#3f6a88; --blue-d:#9fd0ee; --yellow:#8a6c25; --yellow-d:#fbd77a;
+    --btn:#4a4137; --btn-h:#574c40; --accent:#e8a487;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#2b2620; --card:#38312a; --ink:#f1e8d8; --muted:#b5a68f; --line:#8d7f69;
+  --disc:#3f372f; --curtain:#5a4e3e; --curtain2:#65584a;
+  --blue:#3f6a88; --blue-d:#9fd0ee; --yellow:#8a6c25; --yellow-d:#fbd77a;
+  --btn:#4a4137; --btn-h:#574c40; --accent:#e8a487;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Nunito","Segoe UI",Roboto,Arial,sans-serif;font-size:20px;
+  display:flex;flex-direction:column;align-items:center;padding:20px 16px 32px}
+h1{font-size:clamp(24px,4vw,34px);margin:4px 0 2px;text-align:center}
+.sub{color:var(--muted);margin:0 0 12px;text-align:center;font-size:clamp(16px,2.4vw,20px)}
+.board{width:min(100%,860px);background:var(--card);border-radius:24px;
+  border:2px solid var(--line);box-shadow:0 6px 0 rgba(120,100,70,.12);padding:12px}
+svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 4px}
+button{font:inherit;font-weight:700;font-size:clamp(17px,2.6vw,22px);color:var(--ink);
+  background:var(--btn);border:2px solid var(--line);border-radius:16px;padding:14px 22px;
+  cursor:pointer;transition:background .2s,transform .1s}
+button:hover:not(:disabled){background:var(--btn-h)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--accent);color:#fff;border-color:transparent}
+button.primary:hover{filter:brightness(.95);background:var(--accent)}
+:focus-visible{outline:3px solid var(--blue-d);outline-offset:3px}
+.formula{width:min(100%,860px);margin-top:18px;background:var(--card);border:2px solid var(--line);
+  border-radius:24px;padding:18px 20px;text-align:center;box-shadow:0 6px 0 rgba(120,100,70,.12)}
+.eq{font-size:clamp(34px,8vw,64px);font-weight:800;line-height:1.15;display:flex;flex-wrap:wrap;
+  justify-content:center;align-items:center;gap:.25em}
+.eq .a1,.eq .a2{padding:0 .3em;border-radius:14px;min-width:2.2em}
+.eq .a1{background:var(--blue);color:var(--ink)}
+.eq .a2{background:var(--yellow);color:var(--ink)}
+.eq .op{color:var(--muted)}
+.note{margin:8px 0 0;color:var(--muted);font-size:clamp(16px,2.4vw,20px)}
+
+/* SVG */
+#shutter{transform-origin:400px 250px;transform:scaleY(0);transition:transform .9s cubic-bezier(.4,0,.2,1)}
+.closed #shutter{transform:scaleY(1)}
+#diam{stroke:var(--line);stroke-width:3;transition:stroke-width .5s,stroke .5s}
+.closed #diam{stroke:var(--ink);stroke-width:9}
+#live{opacity:0;pointer-events:none;transition:opacity .6s .5s}
+.closed #live{opacity:1;pointer-events:auto}
+.cap{font-weight:800;font-size:30px;fill:var(--ink);text-anchor:middle;transition:opacity .5s}
+#capFull{opacity:1}#capHalf{opacity:0}
+.closed #capFull{opacity:0}.closed #capHalf{opacity:1}
+.lbl{font-weight:800;font-size:38px;text-anchor:middle;dominant-baseline:central;
+  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round}
+#handle{cursor:grab}#handle:active{cursor:grabbing}
+</style>
+</head>
+<body>
+<h1>Розгорнутий та суміжні кути</h1>
+
+<div class="board">
+<svg id="svg" viewBox="0 0 800 475" role="img" aria-label="Коло з діаметром і променем, що ділить розгорнутий кут на два суміжні">
+  <defs>
+    <pattern id="stripes" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="14" height="14" fill="var(--curtain)"/>
+      <rect width="6" height="14" fill="var(--curtain2)"/>
+    </pattern>
+    <clipPath id="upper"><path d="M200 250 A200 200 0 0 1 600 250 Z"/></clipPath>
+  </defs>
+
+  <circle cx="400" cy="250" r="200" fill="var(--disc)" stroke="var(--line)" stroke-width="4"/>
+
+  <g id="live">
+    <g clip-path="url(#upper)">
+      <path id="sec1" fill="var(--blue)" opacity=".95"/>
+      <path id="sec2" fill="var(--yellow)" opacity=".95"/>
+    </g>
+    <path id="arc1" fill="none" stroke="var(--blue-d)" stroke-width="5" stroke-linecap="round"/>
+    <path id="arc2" fill="none" stroke="var(--yellow-d)" stroke-width="5" stroke-linecap="round"/>
+    <text id="lbl1" class="lbl" fill="var(--blue-d)"></text>
+    <text id="lbl2" class="lbl" fill="var(--yellow-d)"></text>
+  </g>
+
+  <path id="shutter" d="M200 250 A200 200 0 0 0 600 250 Z" fill="url(#stripes)" stroke="var(--line)" stroke-width="3"/>
+  <path d="M200 250 A200 200 0 0 1 600 250" fill="none" stroke="var(--line)" stroke-width="4"/>
+  <line id="diam" x1="200" y1="250" x2="600" y2="250" stroke-linecap="round"/>
+  <circle cx="400" cy="250" r="7" fill="var(--ink)"/>
+
+  <g id="rayG" style="opacity:0;pointer-events:none;transition:opacity .6s .5s">
+    <line id="ray" x1="400" y1="250" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"/>
+    <circle id="handle" r="20" fill="var(--accent)" stroke="var(--card)" stroke-width="4"
+            tabindex="0" role="slider" aria-label="Промінь" aria-valuemin="5" aria-valuemax="175"/>
+  </g>
+
+</svg>
+<div class="controls">
+  <button id="toggle" class="primary" aria-pressed="false">Закрити половину кола (Розгорнутий кут)</button>
+  <button id="hide" disabled>Приховати градуси</button>
+</div>
+</div>
+
+<script>
+(function(){
+  var CX=400, CY=250, R=200, PI=Math.PI;
+  var $=function(id){return document.getElementById(id)};
+  var svg=$('svg'), board=svg;
+  var closed=false, hidden=false, target=65, shown=65, dragging=false, raf=null;
+
+  function pt(r,a){var t=a*PI/180;return [CX+r*Math.cos(t), CY-r*Math.sin(t)]}
+  function f(p){return p[0].toFixed(2)+' '+p[1].toFixed(2)}
+
+  function draw(){
+    var d=shown, A=pt(R+4,0), B=pt(R+4,d), C=pt(R+4,180), O=CX+' '+CY;
+    $('sec1').setAttribute('d','M'+O+' L'+f(A)+' A'+(R+4)+' '+(R+4)+' 0 0 0 '+f(B)+' Z');
+    $('sec2').setAttribute('d','M'+O+' L'+f(B)+' A'+(R+4)+' '+(R+4)+' 0 0 0 '+f(C)+' Z');
+    var r=58;
+    $('arc1').setAttribute('d','M'+f(pt(r,0))+' A'+r+' '+r+' 0 0 0 '+f(pt(r,d)));
+    $('arc2').setAttribute('d','M'+f(pt(r+14,d))+' A'+(r+14)+' '+(r+14)+' 0 0 0 '+f(pt(r+14,180)));
+    var p1=pt(135,d/2), p2=pt(135,(d+180)/2);
+    var yMax=CY-30;
+    $('lbl1').setAttribute('x',p1[0]); $('lbl1').setAttribute('y',Math.min(p1[1],yMax));
+    $('lbl2').setAttribute('x',p2[0]); $('lbl2').setAttribute('y',Math.min(p2[1],yMax));
+    var tip=pt(R+28,d);
+    $('ray').setAttribute('x2',tip[0]); $('ray').setAttribute('y2',tip[1]);
+    $('handle').setAttribute('cx',tip[0]); $('handle').setAttribute('cy',tip[1]);
+  }
+
+  function text(){
+    var a1=target, a2=180-target;
+    $('lbl1').textContent=a1+'°';
+    $('lbl2').textContent=a2+'°';
+    $('lbl1').style.display=$('lbl2').style.display=hidden?'none':'';
+    $('handle').setAttribute('aria-valuenow',a1);
+    $('handle').setAttribute('aria-valuetext',a1+' градусів');
+  }
+
+  function loop(){
+    var diff=target-shown;
+    if(Math.abs(diff)<0.05){shown=target;draw();raf=null;return}
+    shown+=diff*0.3; draw(); raf=requestAnimationFrame(loop);
+  }
+  function setAngle(v){
+    if(v===target)return;
+    target=v; text();
+    if(!raf) raf=requestAnimationFrame(loop);
+  }
+
+  function fromEvent(e){
+    var p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
+    var q=p.matrixTransform(svg.getScreenCTM().inverse());
+    var a=Math.atan2(CY-q.y, q.x-CX)*180/PI;
+    if(a<0) a=(a>-90)?0:180;
+    a=Math.max(5,Math.min(175,a));
+    return Math.round(a/5)*5;
+  }
+  svg.addEventListener('pointerdown',function(e){
+    if(!closed) return;
+    dragging=true; svg.setPointerCapture(e.pointerId);
+    setAngle(fromEvent(e)); e.preventDefault();
+  });
+  svg.addEventListener('pointermove',function(e){ if(dragging) setAngle(fromEvent(e)); });
+  function end(e){ dragging=false; }
+  svg.addEventListener('pointerup',end);
+  svg.addEventListener('pointercancel',end);
+
+  $('handle').addEventListener('keydown',function(e){
+    var k=e.key, v=target;
+    if(k==='ArrowLeft'||k==='ArrowUp'||k==='ArrowDown'&&false) v+=5;
+    else if(k==='ArrowRight'||k==='ArrowDown') v-=5;
+    else return;
+    e.preventDefault(); setAngle(Math.max(5,Math.min(175,v)));
+  });
+
+  $('toggle').addEventListener('click',function(){
+    closed=!closed;
+    svg.classList.toggle('closed',closed);
+    $('rayG').style.opacity=closed?1:0;
+    $('rayG').style.pointerEvents=closed?'auto':'none';
+    $('toggle').textContent=closed?'Відкрити коло знову':'Закрити половину кола (Розгорнутий кут)';
+    $('toggle').setAttribute('aria-pressed',closed);
+    $('hide').disabled=!closed;
+    if(!closed){hidden=false;$('hide').textContent='Приховати градуси'}
+    text();
+  });
+  $('hide').addEventListener('click',function(){
+    hidden=!hidden;
+    $('hide').textContent=hidden?'Показати градуси':'Приховати градуси';
+    text();
+  });
+
+  draw(); text();
+})();
+</script>
+</body>
+</html>
