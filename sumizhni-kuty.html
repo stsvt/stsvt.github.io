@@ -73,13 +73,28 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 .closed #live{opacity:1;pointer-events:auto}
 .ray-lbls{opacity:0;pointer-events:none;transition:opacity .6s .5s}
 .closed .ray-lbls{opacity:1}
-.geo-lbl{font-weight:800;font-size:32px;text-anchor:middle;dominant-baseline:central;
-  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round;pointer-events:none}
 .cap{font-weight:800;font-size:30px;fill:var(--ink);text-anchor:middle;transition:opacity .5s}
 #capFull{opacity:1}#capHalf{opacity:0}
 .closed #capFull{opacity:0}.closed #capHalf{opacity:1}
-.lbl{font-weight:800;font-size:38px;text-anchor:middle;dominant-baseline:central;fill:var(--ink);
-  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round;pointer-events:none}
+.geo-lbl {
+    font-weight: 800;
+    font-size: 32px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    stroke: none;
+    paint-order: normal;
+}
+.lbl {
+    font-weight: 800;
+    font-size: 38px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--ink);
+    pointer-events: none;
+    stroke: none;
+    paint-order: normal;
+}
 #handle{cursor:grab}#handle:active{cursor:grabbing}
 </style>
 </head>
