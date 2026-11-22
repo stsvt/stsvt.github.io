@@ -78,7 +78,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 .cap{font-weight:800;font-size:30px;fill:var(--ink);text-anchor:middle;transition:opacity .5s}
 #capFull{opacity:1}#capHalf{opacity:0}
 .closed #capFull{opacity:0}.closed #capHalf{opacity:1}
-.lbl{font-weight:800;font-size:38px;text-anchor:middle;dominant-baseline:central;
+.lbl{font-weight:800;font-size:38px;text-anchor:middle;dominant-baseline:central;fill:var(--ink);
   paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round;pointer-events:none}
 #handle{cursor:grab}#handle:active{cursor:grabbing}
 </style>
@@ -105,8 +105,8 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
     </g>
     <path id="arc1" fill="none" stroke="var(--blue-d)" stroke-width="5" stroke-linecap="round"/>
     <path id="arc2" fill="none" stroke="var(--yellow-d)" stroke-width="5" stroke-linecap="round"/>
-    <text id="lbl1" class="lbl" fill="var(--blue-d)"></text>
-    <text id="lbl2" class="lbl" fill="var(--yellow-d)"></text>
+    <text id="lbl1" class="lbl"></text>
+    <text id="lbl2" class="lbl"></text>
   </g>
 
   <path id="shutter" d="M200 250 A200 200 0 0 0 600 250 Z" fill="url(#stripes)" stroke="var(--line)" stroke-width="3"/>
