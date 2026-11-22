@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Кут оберту</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+  --bg:#f6efe2; --gray:#d3cfc8; --card:#fffaf0; --ink:#4a3f35; --muted:#8a7b6a; --line:#b9a98f;
+  --disc:#fffdf7;
+  --green:#bfe3c2; --green-d:#4f9a62; --yellow:#fbe2a2; --yellow-d:#c58f1c;
+  --btn:#e9dcc6; --btn-h:#e0d0b2; --accent:#d98b6a;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --gray:#666059;
+    --bg:#2b2620; --card:#38312a; --ink:#f1e8d8; --muted:#b5a68f; --line:#8d7f69;
+    --disc:#3f372f;
+    --green:#4c7a56; --green-d:#9ad8a8; --yellow:#8a6c25; --yellow-d:#fbd77a;
+    --btn:#4a4137; --btn-h:#574c40; --accent:#e8a487;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --gray:#666059;
+  --bg:#2b2620; --card:#38312a; --ink:#f1e8d8; --muted:#b5a68f; --line:#8d7f69;
+  --disc:#3f372f;
+  --green:#4c7a56; --green-d:#9ad8a8; --yellow:#8a6c25; --yellow-d:#fbd77a;
+  --btn:#4a4137; --btn-h:#574c40; --accent:#e8a487;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Nunito","Segoe UI",Roboto,Arial,sans-serif;font-size:20px;
+  display:flex;flex-direction:column;align-items:center;padding:20px 16px 32px}
+h1{font-size:clamp(24px,4vw,34px);margin:4px 0 12px;text-align:center}
+.board{width:min(100%,860px);background:var(--card);border-radius:24px;
+  border:2px solid var(--line);box-shadow:0 6px 0 rgba(120,100,70,.12);padding:12px}
+svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.formula{width:min(100%,560px);margin-top:12px;background:var(--card);border:2px solid var(--line);
+  border-radius:18px;padding:10px 14px;text-align:center;box-shadow:0 6px 0 rgba(120,100,70,.12)}
+.big{font-size:clamp(20px,4.5vw,28px);font-weight:800;line-height:1.15}
+.big span{display:inline-block;padding:0 .3em;border-radius:10px;background:var(--gray)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0 0}
+button{font:inherit;font-weight:700;font-size:clamp(14px,3.6vw,16px);color:var(--ink);
+  background:var(--btn);border:2px solid var(--line);border-radius:12px;padding:8px 14px;cursor:pointer}
+button:hover{background:var(--btn-h)}
+button.primary{background:var(--accent);color:#fff;border-color:transparent}
+button.primary:hover{filter:brightness(.95);background:var(--accent)}
+:focus-visible{outline:3px solid var(--green-d);outline-offset:3px}
+.lbl{font-weight:800;font-size:34px;text-anchor:middle;dominant-baseline:central;fill:var(--ink);
+  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round}
+.tag{font-weight:700;font-size:20px;fill:var(--muted)}
+#earthG{cursor:grab}#earthG:active{cursor:grabbing}
+</style>
+</head>
+<body>
+<h1>Кут оберту</h1>
+
+<div class="board">
+<svg id="svg" viewBox="0 0 800 500" role="img" aria-label="Земля на орбіті навколо Сонця та кут оберту від початкової точки">
+  <path id="sector" fill="var(--gray)" opacity=".8"/>
+  <circle cx="400" cy="250" r="190" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-dasharray="6 9"/>
+  <circle cx="400" cy="250" r="50" fill="var(--yellow)" stroke="var(--yellow-d)" stroke-width="4"/>
+  <line x1="400" y1="250" x2="590" y2="250" stroke="var(--muted)" stroke-width="2.5" stroke-dasharray="6 8"/>
+  <line id="ray" x1="400" y1="250" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="400" cy="250" r="5" fill="var(--ink)"/>
+  <path id="arc" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+  <text id="lbl" class="lbl"></text>
+  <circle cx="590" cy="250" r="6" fill="var(--card)" stroke="var(--ink)" stroke-width="3"/>
+  <text class="tag" x="606" y="226">Старт 0°</text>
+  <g id="earthG" tabindex="0" role="slider" aria-label="Земля" aria-valuemin="0" aria-valuemax="360">
+    <circle id="hit" r="30" fill="transparent"/>
+    <circle r="16" fill="#7fc98f" stroke="var(--green-d)" stroke-width="4"/>
+  </g>
+</svg>
+</div>
+
+<div class="formula" aria-live="polite">
+  <div id="big" class="big"></div>
+  <div class="controls">
+    <button id="b0" class="primary">Скинути на 0°</button>
+    <button id="b90">90°</button>
+    <button id="b180">180°</button>
+    <button id="b360">360°</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var CX=400, CY=250, R=190, RA=80, RL=115, PI=Math.PI;
+  var $=function(id){return document.getElementById(id)};
+  var svg=$('svg'), ang=0, dragging=false;
+  function pt(r,a){var t=a*PI/180;return [CX+r*Math.cos(t), CY-r*Math.sin(t)]}
+  function f(p){return p[0].toFixed(2)+' '+p[1].toFixed(2)}
+
+  function render(){
+    var e=pt(R,ang), sec='', arc='';
+    if(ang>0 && ang<360){
+      var big=ang>180?1:0;
+      sec='M'+CX+' '+CY+' L'+f(pt(R,0))+' A'+R+' '+R+' 0 '+big+' 0 '+f(e)+' Z';
+      arc='M'+f(pt(RA,0))+' A'+RA+' '+RA+' 0 '+big+' 0 '+f(pt(RA,ang));
+    }else if(ang===360){
+      sec='M'+f(pt(R,0))+' A'+R+' '+R+' 0 1 0 '+f(pt(R,180))+' A'+R+' '+R+' 0 1 0 '+f(pt(R,0))+' Z';
+      arc='M'+f(pt(RA,0))+' A'+RA+' '+RA+' 0 1 0 '+f(pt(RA,180))+' A'+RA+' '+RA+' 0 1 0 '+f(pt(RA,0));
+    }
+    $('sector').setAttribute('d',sec);
+    $('arc').setAttribute('d',arc);
+    $('ray').setAttribute('x2',e[0]); $('ray').setAttribute('y2',e[1]);
+    $('earthG').setAttribute('transform','translate('+e[0]+' '+e[1]+')');
+    $('earthG').setAttribute('aria-valuenow',ang);
+    $('earthG').setAttribute('aria-valuetext',ang+' градусів');
+    var l=$('lbl');
+    if(ang>0){
+      var p=pt(RL,Math.max(ang/2,15));
+      l.setAttribute('x',p[0]); l.setAttribute('y',p[1]); l.textContent=ang+'°';
+    }else l.textContent='';
+    $('big').innerHTML=ang===360 ? 'Повний оберт: <span>360°</span>' : 'Кут оберту: <span>'+ang+'°</span>';
+  }
+  function set(v){ang=Math.max(0,Math.min(360,v));render()}
+
+  function fromEvent(e){
+    var p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
+    var q=p.matrixTransform(svg.getScreenCTM().inverse());
+    var a=Math.atan2(CY-q.y,q.x-CX)*180/PI; if(a<0)a+=360;
+    var s=Math.round(a/5)*5; if(s>=360)s=0;
+    if(ang>=270 && s<90) s=360;
+    else if(ang<90 && s>270) s=0;
+    return s;
+  }
+  var g=$('earthG');
+  g.addEventListener('pointerdown',function(e){dragging=true;g.setPointerCapture(e.pointerId);g.focus();e.preventDefault()});
+  g.addEventListener('pointermove',function(e){if(dragging)set(fromEvent(e))});
+  g.addEventListener('pointerup',function(){dragging=false});
+  g.addEventListener('pointercancel',function(){dragging=false});
+  g.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='ArrowUp'||k==='ArrowLeft') set(ang+5);
+    else if(k==='ArrowDown'||k==='ArrowRight') set(ang-5);
+    else return;
+    e.preventDefault();
+  });
+  $('b0').onclick=function(){set(0)};
+  $('b90').onclick=function(){set(90)};
+  $('b180').onclick=function(){set(180)};
+  $('b360').onclick=function(){set(360)};
+  render();
+})();
+</script>
+</body>
+</html>
