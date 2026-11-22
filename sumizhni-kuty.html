@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Розгорнутий та суміжні кути</title>
+<title>Суміжні кути</title>
 <style>
 :root{
   box-sizing:border-box;
@@ -76,7 +76,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 </style>
 </head>
 <body>
-<h1>Розгорнутий та суміжні кути</h1>
+<h1>Суміжні кути</h1>
 
 <div class="board">
 <svg id="svg" viewBox="0 0 800 475" role="img" aria-label="Коло з діаметром і променем, що ділить розгорнутий кут на два суміжні">
@@ -114,7 +114,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 
 </svg>
 <div class="controls">
-  <button id="toggle" class="primary" aria-pressed="false">Закрити половину кола (Розгорнутий кут)</button>
+  <button id="toggle" class="primary" aria-pressed="false">Закрити половину кола</button>
   <button id="hide" disabled>Приховати градуси</button>
 </div>
 </div>
@@ -196,7 +196,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
     svg.classList.toggle('closed',closed);
     $('rayG').style.opacity=closed?1:0;
     $('rayG').style.pointerEvents=closed?'auto':'none';
-    $('toggle').textContent=closed?'Відкрити коло знову':'Закрити половину кола (Розгорнутий кут)';
+    $('toggle').textContent=closed?'Відкрити коло знову':'Закрити половину кола';
     $('toggle').setAttribute('aria-pressed',closed);
     $('hide').disabled=!closed;
     if(!closed){hidden=false;$('hide').textContent='Приховати градуси'}
