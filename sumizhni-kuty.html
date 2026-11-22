@@ -71,11 +71,15 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 .closed #vertex{r:13}
 #live{opacity:0;pointer-events:none;transition:opacity .6s .5s}
 .closed #live{opacity:1;pointer-events:auto}
+.ray-lbls{opacity:0;pointer-events:none;transition:opacity .6s .5s}
+.closed .ray-lbls{opacity:1}
+.geo-lbl{font-weight:800;font-size:32px;text-anchor:middle;dominant-baseline:central;
+  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round;pointer-events:none}
 .cap{font-weight:800;font-size:30px;fill:var(--ink);text-anchor:middle;transition:opacity .5s}
 #capFull{opacity:1}#capHalf{opacity:0}
 .closed #capFull{opacity:0}.closed #capHalf{opacity:1}
 .lbl{font-weight:800;font-size:38px;text-anchor:middle;dominant-baseline:central;
-  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round}
+  paint-order:stroke;stroke:var(--card);stroke-width:7px;stroke-linejoin:round;pointer-events:none}
 #handle{cursor:grab}#handle:active{cursor:grabbing}
 </style>
 </head>
@@ -109,13 +113,20 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
   <path class="circle-outline" d="M200 250 A200 200 0 0 1 600 250" fill="none" stroke="var(--line)" stroke-width="4"/>
   <line id="diam" x1="200" y1="250" x2="600" y2="250" stroke-linecap="round"/>
 
+  <g class="ray-lbls">
+    <text x="172" y="250" class="geo-lbl" fill="var(--ink)">A</text>
+    <text x="628" y="250" class="geo-lbl" fill="var(--ink)">B</text>
+  </g>
+
   <g id="rayG" style="opacity:0;pointer-events:none;transition:opacity .6s .5s">
     <line id="ray" x1="400" y1="250" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"/>
     <circle id="handle" r="20" fill="var(--accent)" stroke="var(--card)" stroke-width="4"
             tabindex="0" role="slider" aria-label="Промінь" aria-valuemin="5" aria-valuemax="175"/>
+    <text id="lblC" class="geo-lbl" fill="var(--accent)">C</text>
   </g>
 
   <circle id="vertex" cx="400" cy="250" r="7" fill="var(--ink)"/>
+  <text x="400" y="284" class="geo-lbl" fill="var(--ink)">O</text>
 
 </svg>
 <div class="controls">
@@ -148,6 +159,8 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
     var tip=pt(R+28,d);
     $('ray').setAttribute('x2',tip[0]); $('ray').setAttribute('y2',tip[1]);
     $('handle').setAttribute('cx',tip[0]); $('handle').setAttribute('cy',tip[1]);
+    var tipC=pt(R+64,d);
+    $('lblC').setAttribute('x',tipC[0]); $('lblC').setAttribute('y',tipC[1]);
   }
 
   function text(){
