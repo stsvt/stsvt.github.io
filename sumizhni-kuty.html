@@ -61,8 +61,10 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 .note{margin:8px 0 0;color:var(--muted);font-size:clamp(16px,2.4vw,20px)}
 
 /* SVG */
-#shutter{transform-origin:400px 250px;transform:scaleY(0);transition:transform .9s cubic-bezier(.4,0,.2,1)}
-.closed #shutter{transform:scaleY(1)}
+.circle-outline{transition:stroke-opacity .5s,stroke-width .5s}
+.closed .circle-outline{stroke-opacity:.25;stroke-width:2}
+#shutter{transform-origin:400px 250px;transform:scaleY(0);transition:transform .9s cubic-bezier(.4,0,.2,1),stroke-opacity .5s}
+.closed #shutter{transform:scaleY(1);stroke-opacity:.25}
 #diam{stroke:var(--line);stroke-width:3;transition:stroke-width .5s,stroke .5s}
 .closed #diam{stroke:var(--ink);stroke-width:9}
 #live{opacity:0;pointer-events:none;transition:opacity .6s .5s}
@@ -88,7 +90,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
     <clipPath id="upper"><path d="M200 250 A200 200 0 0 1 600 250 Z"/></clipPath>
   </defs>
 
-  <circle cx="400" cy="250" r="200" fill="var(--disc)" stroke="var(--line)" stroke-width="4"/>
+  <circle class="circle-outline" cx="400" cy="250" r="200" fill="var(--disc)" stroke="var(--line)" stroke-width="4"/>
 
   <g id="live">
     <g clip-path="url(#upper)">
@@ -102,7 +104,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
   </g>
 
   <path id="shutter" d="M200 250 A200 200 0 0 0 600 250 Z" fill="url(#stripes)" stroke="var(--line)" stroke-width="3"/>
-  <path d="M200 250 A200 200 0 0 1 600 250" fill="none" stroke="var(--line)" stroke-width="4"/>
+  <path class="circle-outline" d="M200 250 A200 200 0 0 1 600 250" fill="none" stroke="var(--line)" stroke-width="4"/>
   <line id="diam" x1="200" y1="250" x2="600" y2="250" stroke-linecap="round"/>
   <circle cx="400" cy="250" r="7" fill="var(--ink)"/>
 
@@ -185,7 +187,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 
   $('handle').addEventListener('keydown',function(e){
     var k=e.key, v=target;
-    if(k==='ArrowLeft'||k==='ArrowUp'||k==='ArrowDown'&&false) v+=5;
+    if(k==='ArrowLeft'||k==='ArrowUp') v+=5;
     else if(k==='ArrowRight'||k==='ArrowDown') v-=5;
     else return;
     e.preventDefault(); setAngle(Math.max(5,Math.min(175,v)));
@@ -213,4 +215,3 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 </script>
 </body>
 </html>
-<script async src="/.netlify/scripts/hud?variant=owner-private" data-nf-variant="owner-private" data-netlify-site-id="69c37c86-4f19-4434-ac76-821a0b533f44" data-app-host="app.netlify.com"></script>
