@@ -204,7 +204,7 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
     var a=Math.atan2(CY-q.y, q.x-CX)*180/PI;
     if(a<0) a=(a>-90)?0:180;
     a=Math.max(5,Math.min(175,a));
-    return Math.round(a/5)*5;
+    return Math.round(a);
   }
   svg.addEventListener('pointerdown',function(e){
     if(!closed) return;
@@ -218,8 +218,8 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 
   $('handle').addEventListener('keydown',function(e){
     var k=e.key, v=target;
-    if(k==='ArrowLeft'||k==='ArrowUp') v+=5;
-    else if(k==='ArrowRight'||k==='ArrowDown') v-=5;
+    if(k==='ArrowLeft'||k==='ArrowUp') v+=1;
+    else if(k==='ArrowRight'||k==='ArrowDown') v-=1;
     else return;
     e.preventDefault(); setAngle(Math.max(5,Math.min(175,v)));
   });
