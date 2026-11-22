@@ -193,17 +193,15 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 
   $('toggle').addEventListener('click',function(){
     closed=!closed;
-    hidden=closed;
     svg.classList.toggle('closed',closed);
     $('rayG').style.opacity=closed?1:0;
     $('rayG').style.pointerEvents=closed?'auto':'none';
     $('toggle').textContent=closed?'Відкрити коло знову':'Закрити половину кола (Розгорнутий кут)';
     $('toggle').setAttribute('aria-pressed',closed);
     $('hide').disabled=!closed;
-    $('hide').textContent=hidden?'Показати градуси':'Приховати градуси';
+    if(!closed){hidden=false;$('hide').textContent='Приховати градуси'}
     text();
   });
-  
   $('hide').addEventListener('click',function(){
     hidden=!hidden;
     $('hide').textContent=hidden?'Показати градуси':'Приховати градуси';
@@ -215,3 +213,4 @@ button.primary:hover{filter:brightness(.95);background:var(--accent)}
 </script>
 </body>
 </html>
+<script async src="/.netlify/scripts/hud?variant=owner-private" data-nf-variant="owner-private" data-netlify-site-id="69c37c86-4f19-4434-ac76-821a0b533f44" data-app-host="app.netlify.com"></script>
