@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Прямі та точки</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+  --bg:#f6efe2; --gray:#d3cfc8; --card:#fffaf0; --ink:#4a3f35; --muted:#8a7b6a; --line:#b9a98f;
+  --green:#bfe3c2; --green-d:#4f9a62; --blue-d:#4f8fb8;
+  --btn:#e9dcc6; --btn-h:#e0d0b2; --accent:#d98b6a;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --gray:#666059;
+    --bg:#2b2620; --card:#38312a; --ink:#f1e8d8; --muted:#b5a68f; --line:#8d7f69;
+    --green:#4c7a56; --green-d:#9ad8a8; --blue-d:#8cc4e8;
+    --btn:#4a4137; --btn-h:#574c40; --accent:#e8a487;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --gray:#666059;
+  --bg:#2b2620; --card:#38312a; --ink:#f1e8d8; --muted:#b5a68f; --line:#8d7f69;
+  --green:#4c7a56; --green-d:#9ad8a8; --blue-d:#8cc4e8;
+  --btn:#4a4137; --btn-h:#574c40; --accent:#e8a487;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Nunito","Segoe UI",Roboto,Arial,sans-serif;font-size:20px;
+  display:flex;flex-direction:column;align-items:center;padding:16px 16px 28px}
+.tabs,.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tabs{margin-bottom:12px}
+.board{width:min(100%,860px);background:var(--card);border-radius:24px;
+  border:2px solid var(--line);box-shadow:0 6px 0 rgba(120,100,70,.12);padding:12px}
+svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.controls{margin:10px 0 2px}
+.status{width:min(100%,560px);margin-top:12px;background:var(--card);border:2px solid var(--line);
+  border-radius:18px;padding:12px 16px;text-align:center;font-weight:800;
+  font-size:clamp(17px,3.4vw,22px);box-shadow:0 6px 0 rgba(120,100,70,.12)}
+.status.ok{background:var(--green)}
+button{font:inherit;font-weight:700;font-size:clamp(14px,3.6vw,16px);color:var(--ink);
+  background:var(--btn);border:2px solid var(--line);border-radius:12px;padding:8px 14px;cursor:pointer}
+button:hover{background:var(--btn-h)}
+button.primary{background:var(--accent);color:#fff;border-color:transparent}
+button.primary:hover{filter:brightness(.95);background:var(--accent)}
+:focus-visible{outline:3px solid var(--green-d);outline-offset:3px}
+.lab{font-weight:800;font-size:30px;fill:var(--ink);pointer-events:none;
+  paint-order:stroke;stroke:var(--card);stroke-width:6px;stroke-linejoin:round}
+[data-d]{cursor:grab}
+</style>
+</head>
+<body>
+<div class="tabs">
+  <button id="t1" class="primary">Основна властивість прямої</button>
+  <button id="t2">Перетин прямих</button>
+</div>
+
+<div class="board">
+<svg id="svg" viewBox="0 0 800 500" role="img" aria-label="Полотно з точками та прямими">
+  <g id="grid" stroke="var(--line)" stroke-width="1" opacity=".45" display="none"></g>
+  <g id="g1"></g>
+  <g id="g2" display="none"></g>
+</svg>
+<div class="controls">
+  <button id="tryBtn" aria-pressed="false">Спробувати провести іншу лінію</button>
+  <button id="magBtn" style="display:none">Магніт до сітки: увімк.</button>
+  <button id="reset" aria-label="Скинути">↻ Скинути</button>
+</div>
+</div>
+<div id="status" class="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var svg=$('svg'), mode=1, magnet=true, tryOn=false, drag=null, S;
+  var W=800,H=500,G=25;
+
+  var gr='';
+  for(var x=0;x<=W;x+=50)gr+='<line x1="'+x+'" y1="0" x2="'+x+'" y2="'+H+'"/>';
+  for(var y=0;y<=H;y+=50)gr+='<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'"/>';
+  $('grid').innerHTML=gr;
+
+  function reset(){
+    S={A:[250,320],B:[550,180],a:[[150,350],[650,150]],b:[[150,150],[650,350]]};
+    S.th=Math.atan2(S.B[1]-S.A[1],S.B[0]-S.A[0])+0.6;
+  }
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+  function snap(p){
+    var q=[clamp(p[0],12,W-12),clamp(p[1],12,H-12)];
+    return magnet?[Math.round(q[0]/G)*G,Math.round(q[1]/G)*G]:q;
+  }
+  function dist(p,q){return Math.hypot(p[0]-q[0],p[1]-q[1])}
+  function inf(p,q,at){
+    var dx=q[0]-p[0],dy=q[1]-p[1],n=Math.hypot(dx,dy)||1,ux=dx/n*2500,uy=dy/n*2500;
+    return '<line x1="'+(p[0]-ux)+'" y1="'+(p[1]-uy)+'" x2="'+(p[0]+ux)+'" y2="'+(p[1]+uy)+'" stroke-linecap="round" '+at+'/>';
+  }
+  function dot(p,id,r,fill,stroke){
+    return '<circle data-d="'+id+'" cx="'+p[0]+'" cy="'+p[1]+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="4"/>';
+  }
+  function txt(p,t){return '<text class="lab" x="'+(p[0]+20)+'" y="'+(p[1]-18)+'">'+t+'</text>'}
+  function cross(a,b){return a[0]*b[1]-a[1]*b[0]}
+
+  function merged(){
+    if(!tryOn)return false;
+    var u=[Math.cos(S.th),Math.sin(S.th)];
+    return Math.abs(cross([S.B[0]-S.A[0],S.B[1]-S.A[1]],u))<2;
+  }
+
+  function render1(){
+    var A=S.A,B=S.B,dx=B[0]-A[0],dy=B[1]-A[1],n=Math.hypot(dx,dy),ux=dx/n,uy=dy/n,nx=-uy,ny=ux,h='';
+    var u=[Math.cos(S.th),Math.sin(S.th)];
+    if(tryOn){
+      [1.1,-1.1,2.2].forEach(function(k){
+        var s=k*38, m=[(A[0]+B[0])/2,(A[1]+B[1])/2];
+        var L=[A[0]-ux*320,A[1]-uy*320], R=[B[0]+ux*320,B[1]+uy*320];
+        h+='<path d="M'+L+' Q'+[A[0]-ux*160+nx*s,A[1]-uy*160+ny*s]+' '+A+' Q'+[m[0]-nx*s,m[1]-ny*s]+' '+B+' Q'+[B[0]+ux*160+nx*s,B[1]+uy*160+ny*s]+' '+R+'" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="7 8"/>';
+      });
+      h+=inf(A,[A[0]+u[0],A[1]+u[1]],'stroke="var(--accent)" stroke-width="5"');
+    }
+    h+=inf(A,B,'stroke="var(--ink)" stroke-width="5"');
+    if(tryOn)h+=dot([A[0]+u[0]*130,A[1]+u[1]*130],'rot',16,'var(--accent)','var(--card)');
+    h+=dot(A,'A',16,'var(--card)','var(--ink)')+dot(B,'B',16,'var(--card)','var(--ink)')+txt(A,'A')+txt(B,'B');
+    $('g1').innerHTML=h;
+  }
+
+  function inter(){
+    var p=S.a[0],q=S.a[1],r=S.b[0],s=S.b[1];
+    var d1=[q[0]-p[0],q[1]-p[1]],d2=[s[0]-r[0],s[1]-r[1]];
+    var c=cross(d1,d2),n1=Math.hypot(d1[0],d1[1]),n2=Math.hypot(d2[0],d2[1]);
+    if(Math.abs(c)<0.009*n1*n2){
+      var off=Math.abs(cross(d1,[r[0]-p[0],r[1]-p[1]]))/n1;
+      return {t:off<3?'same':'par'};
+    }
+    var t=cross([r[0]-p[0],r[1]-p[1]],d2)/c;
+    return {t:'x',p:[p[0]+d1[0]*t,p[1]+d1[1]*t]};
+  }
+  function render2(){
+    var h='',I=inter(),cols=[['a','var(--blue-d)'],['b','var(--accent)']];
+    cols.forEach(function(c){var P=S[c[0]];h+=inf(P[0],P[1],'data-d="l'+c[0]+'" stroke="transparent" stroke-width="26" style="cursor:move"');});
+    cols.forEach(function(c){var P=S[c[0]];h+=inf(P[0],P[1],'stroke="'+c[1]+'" stroke-width="5" pointer-events="none"');});
+    cols.forEach(function(c){
+      var P=S[c[0]];
+      [0,1].forEach(function(i){h+='<circle data-d="p'+i+c[0]+'" cx="'+P[i][0]+'" cy="'+P[i][1]+'" r="15" fill="'+c[1]+'" fill-opacity=".35" stroke="'+c[1]+'" stroke-width="3"/>';});
+      h+='<text class="lab" style="fill:'+c[1]+'" x="'+(P[1][0]+18)+'" y="'+(P[1][1]-16)+'">'+c[0]+'</text>';
+    });
+    if(I.t==='x')h+='<circle cx="'+I.p[0]+'" cy="'+I.p[1]+'" r="9" fill="var(--green-d)" stroke="var(--card)" stroke-width="3" pointer-events="none"/>'+txt(I.p,'O');
+    $('g2').innerHTML=h;
+    return I;
+  }
+
+  function render(){
+    var st=$('status'),ok=false,t;
+    if(mode===1){
+      render1();
+      if(merged()){ok=true;t='Через дві точки A і B можна провести пряму, і тільки одну'}
+      else t=tryOn?'Поверніть помаранчеву пряму так, щоб вона пройшла через B':'Через точки A і B проходить пряма. Перетягніть точки';
+    }else{
+      var I=render2();
+      t=I.t==='x'?'Прямі a і b перетинаються в єдиній точці O':I.t==='par'?'Прямі не мають спільних точок (паралельні)':'Прямі збігаються (безліч спільних точок)';
+    }
+    st.textContent=t; st.className='status'+(ok?' ok':'');
+  }
+
+  function pt(e){
+    var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;
+    var q=p.matrixTransform(svg.getScreenCTM().inverse());return [q.x,q.y];
+  }
+  svg.addEventListener('pointerdown',function(e){
+    var id=e.target.getAttribute&&e.target.getAttribute('data-d');
+    if(!id)return;
+    drag={id:id,s:pt(e),a:JSON.parse(JSON.stringify(S))};
+    svg.setPointerCapture(e.pointerId);e.preventDefault();
+  });
+  svg.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    var p=pt(e),id=drag.id;
+    if(id==='A'||id==='B'){
+      var o=id==='A'?'B':'A',q=[clamp(p[0],20,W-20),clamp(p[1],20,H-20)];
+      if(dist(q,S[o])>40)S[id]=q;
+    }else if(id==='rot'){
+      var th=Math.atan2(p[1]-S.A[1],p[0]-S.A[0]),u=[Math.cos(th),Math.sin(th)];
+      if(Math.abs(cross([S.B[0]-S.A[0],S.B[1]-S.A[1]],u))<12){
+        var ab=Math.atan2(S.B[1]-S.A[1],S.B[0]-S.A[0]);
+        th=Math.cos(th-ab)>0?ab:ab+Math.PI;
+      }
+      S.th=th;
+    }else if(id.charAt(0)==='p'){
+      var i=+id.charAt(1),k=id.charAt(2),q2=snap(p);
+      if(dist(q2,S[k][1-i])>30)S[k][i]=q2;
+    }else{
+      var k2=id.charAt(1),P=drag.a[k2],d=[p[0]-drag.s[0],p[1]-drag.s[1]];
+      var xs=[P[0][0],P[1][0]],ys=[P[0][1],P[1][1]];
+      d[0]=clamp(d[0],12-Math.min(xs[0],xs[1]),W-12-Math.max(xs[0],xs[1]));
+      d[1]=clamp(d[1],12-Math.min(ys[0],ys[1]),H-12-Math.max(ys[0],ys[1]));
+      var n1=snap([P[0][0]+d[0],P[0][1]+d[1]]),sx=n1[0]-P[0][0],sy=n1[1]-P[0][1];
+      S[k2]=[[P[0][0]+sx,P[0][1]+sy],[P[1][0]+sx,P[1][1]+sy]];
+    }
+    render();
+  });
+  function end(){drag=null}
+  svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+
+  function setMode(m){
+    mode=m;
+    $('g1').setAttribute('display',m===1?'':'none');
+    $('g2').setAttribute('display',m===2?'':'none');
+    $('grid').setAttribute('display',m===2&&magnet?'':'none');
+    $('tryBtn').style.display=m===1?'':'none';
+    $('magBtn').style.display=m===2?'':'none';
+    $('t1').className=m===1?'primary':'';$('t2').className=m===2?'primary':'';
+    render();
+  }
+  $('t1').onclick=function(){setMode(1)};
+  $('t2').onclick=function(){setMode(2)};
+  $('tryBtn').onclick=function(){
+    tryOn=!tryOn;this.setAttribute('aria-pressed',tryOn);
+    this.textContent=tryOn?'Сховати інші лінії':'Спробувати провести іншу лінію';render();
+  };
+  $('magBtn').onclick=function(){
+    magnet=!magnet;this.textContent='Магніт до сітки: '+(magnet?'увімк.':'вимк.');
+    $('grid').setAttribute('display',magnet?'':'none');
+  };
+  $('reset').onclick=function(){
+    reset();tryOn=false;$('tryBtn').textContent='Спробувати провести іншу лінію';
+    $('tryBtn').setAttribute('aria-pressed','false');render();
+  };
+  reset();setMode(1);
+})();
+</script>
+</body>
+</html>
